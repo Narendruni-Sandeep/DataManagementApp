@@ -38,34 +38,37 @@ public class DataManagementService {
     }
 
     // Helper method to process each batch
-    private List<DataResponseDTO> processBatch(List<DataRequestDTO> batch) {
-        List<DataManagement> dataManagementList = new ArrayList<>();
-
-        // Collect data for each request in the batch
-        for (DataRequestDTO requestDTO : batch) {
-            dataManagementList.addAll(repository.findByIdFirstNameAndIdLastNameAndOrganizationId(
-                    requestDTO.getFirstName(),
-                    requestDTO.getLastName(),
-                    requestDTO.getOrganizationId()
-            ));
-        }
-
-        // Convert the result into a list of DataResponseDTOs
-        return dataManagementList.stream()
-                .map(this::mapToResponseDTO)
-                .collect(Collectors.toList());
-    }
 //    private List<DataResponseDTO> processBatch(List<DataRequestDTO> batch) {
-//        List<String> firstNames = batch.stream().map(DataRequestDTO::getFirstName).collect(Collectors.toList());
-//        List<String> lastNames = batch.stream().map(DataRequestDTO::getLastName).collect(Collectors.toList());
-//        List<String> organizationIds = batch.stream().map(DataRequestDTO::getOrganizationId).collect(Collectors.toList());
+//        List<DataManagement> dataManagementList = new ArrayList<>();
 //
-//        List<DataManagement> dataManagementList = repository.findByBatch(firstNames, lastNames, organizationIds);
+//        // Collect data for each request in the batch
+//        for (DataRequestDTO requestDTO : batch) {
+//            dataManagementList.addAll(repository.findByIdFirstNameAndIdLastNameAndOrganizationId(
+//                    requestDTO.getFirstName(),
+//                    requestDTO.getLastName(),
+//                    requestDTO.getOrganizationId()
+//            ));
+//        }
 //
+//        // Convert the result into a list of DataResponseDTOs
 //        return dataManagementList.stream()
 //                .map(this::mapToResponseDTO)
 //                .collect(Collectors.toList());
 //    }
+    
+    private List<DataResponseDTO> processBatch(List<DataRequestDTO> batch) {
+        List<String> firstNames = batch.stream().map(DataRequestDTO::getFirstName).collect(Collectors.toList());
+        List<String> lastNames = batch.stream().map(DataRequestDTO::getLastName).collect(Collectors.toList());
+        List<String> organizationIds = batch.stream().map(DataRequestDTO::getOrganizationId).collect(Collectors.toList());
+
+        List<DataManagement> dataManagementList = repository.findByBatch(firstNames, lastNames, organizationIds);
+
+        return dataManagementList.stream()
+                .map(this::mapToResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+
 
     // Method to map DataManagement object to DataResponseDTO
     private DataResponseDTO mapToResponseDTO(DataManagement dataManagement) {

@@ -5,32 +5,36 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.Demo.DataManagementApp.dto.DataRequestDTO;
+import com.Demo.DataManagementApp.model.DataManagement;
 import com.Demo.DataManagementApp.repository.DataManagementRepository;
 
 import java.util.List;
 
 @Component
-public class DataRequestReader implements ItemReader<DataRequestDTO> {
+public class DataRequestReader implements ItemReader<DataManagement> {
 
     @Autowired
     private DataManagementRepository repository;
 
-    private List<DataRequestDTO> data;
+    private List<DataManagement> dataBatch;
     private int index = 0;
 
     @Override
-    public DataRequestDTO read() throws Exception {
-        if (data == null || index >= data.size()) {
-            System.out.println("Reader: No more items to read");
-            return null;
+    public DataManagement read() throws Exception {
+        if (dataBatch == null || index >= dataBatch.size()) {
+            return null; // No more items to read
         }
-        DataRequestDTO currentItem = data.get(index++);
-        System.out.println("Reader: Reading item - " + currentItem.getFirstName() + " " + currentItem.getLastName());
-        return currentItem;
+        return dataBatch.get(index++);
     }
 
-    public void setData(List<DataRequestDTO> data) {
-        this.data = data;
-        this.index = 0;
+    public void setBatch(List<DataRequestDTO> requestDTOs) {
+        // Extract fields for batch query
+        List<String> firstNames = requestDTOs.stream().map(DataRequestDTO::getFirstName).toList();
+        List<String> lastNames = requestDTOs.stream().map(DataRequestDTO::getLastName).toList();
+        List<String> organizationIds = requestDTOs.stream().map(DataRequestDTO::getOrganizationId).toList();
+
+        // Fetch data in a single batch query
+        this.dataBatch = repository.findByBatch(firstNames, lastNames, organizationIds);
+        this.index = 0; // Reset index for the new batch
     }
 }

@@ -16,6 +16,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import com.Demo.DataManagementApp.dto.DataRequestDTO;
 import com.Demo.DataManagementApp.dto.DataResponseDTO;
+import com.Demo.DataManagementApp.model.DataManagement;
 
 @Configuration
 @EnableBatchProcessing
@@ -28,10 +29,11 @@ public class BatchConfig {
 
     @Bean
     public Job batchJob(JobRepository jobRepository, PlatformTransactionManager transactionManager,
-                        ItemReader<DataRequestDTO> reader, ItemProcessor<DataRequestDTO, DataResponseDTO> processor,
+                        ItemReader<DataManagement> reader, // Updated to DataManagement
+                        ItemProcessor<DataManagement, DataResponseDTO> processor, // Updated to DataManagement
                         ItemWriter<DataResponseDTO> writer) {
         Step step = new StepBuilder("step1", jobRepository)
-                .<DataRequestDTO, DataResponseDTO>chunk(100, transactionManager)  // Adjust the chunk size here
+                .<DataManagement, DataResponseDTO>chunk(500, transactionManager)  // Adjust the chunk size here
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)

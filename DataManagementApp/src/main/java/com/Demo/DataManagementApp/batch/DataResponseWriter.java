@@ -17,7 +17,7 @@ public class DataResponseWriter implements ItemWriter<DataResponseDTO> {
     private final DataManagementRepository dataManagementRepository;
     private final BatchResultHolder batchResultHolder;
 
-    // Constructor injection for DataManagementRepository and BatchResultHolder
+    // Constructor for dependency injection
     public DataResponseWriter(DataManagementRepository dataManagementRepository, BatchResultHolder batchResultHolder) {
         this.dataManagementRepository = dataManagementRepository;
         this.batchResultHolder = batchResultHolder;
@@ -29,27 +29,33 @@ public class DataResponseWriter implements ItemWriter<DataResponseDTO> {
 
         if (dataResponseDTOList.isEmpty()) {
             System.out.println("Writer: No items to write");
-        } else {
-            System.out.println("Writer: Writing " + dataResponseDTOList.size() + " items");
+            return;
         }
 
-        // Add processed data to BatchResultHolder
+        System.out.println("Writer: Writing " + dataResponseDTOList.size() + " items");
+
+        // Add processed data to BatchResultHolder for returning as a JSON response
         batchResultHolder.addProcessedData((List<DataResponseDTO>) dataResponseDTOList);
 
-        // Save data to the database
-        for (DataResponseDTO item : dataResponseDTOList) {
-            DataManagement dataManagement = new DataManagement();
-            DataManagementKey key = new DataManagementKey();
-            key.setFirstName(item.getFirstName());
-            key.setLastName(item.getLastName());
+        // Convert DataResponseDTOs to DataManagement entities and save to the database
+        List<DataManagement> dataManagementEntities = dataResponseDTOList.stream()
+                .map(this::mapToEntity)
+                .toList();
 
-            dataManagement.setId(key);
-            dataManagement.setOrganizationId(item.getOrganizationId());
-            dataManagement.setEmail(item.getEmail());
+        dataManagementRepository.saveAll(dataManagementEntities);
+        System.out.println("Writer: Successfully saved " + dataManagementEntities.size() + " items to the database");
+    }
 
-            dataManagementRepository.save(dataManagement);
-        }
+    private DataManagement mapToEntity(DataResponseDTO dto) {
+        DataManagement dataManagement = new DataManagement();
+        DataManagementKey key = new DataManagementKey();
+        key.setFirstName(dto.getFirstName());
+        key.setLastName(dto.getLastName());
 
-        dataResponseDTOList.forEach(item -> System.out.println("Writer: Saved item - " + item.getEmail()));
+        dataManagement.setId(key);
+        dataManagement.setOrganizationId(dto.getOrganizationId());
+        dataManagement.setEmail(dto.getEmail());
+
+        return dataManagement;
     }
 }

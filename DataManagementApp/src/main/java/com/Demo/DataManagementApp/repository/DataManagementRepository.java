@@ -11,13 +11,13 @@ import java.util.List;
 
 @Repository
 public interface DataManagementRepository extends JpaRepository<DataManagement, DataManagementKey> {
-
-    List<DataManagement> findByIdFirstNameAndIdLastNameAndOrganizationId(String firstName, String lastName, String organizationId);
-    
-    
+	List<DataManagement> findByIdFirstNameAndIdLastNameAndOrganizationId(String firstName, String lastName, String organizationId);
+	
+	
     @Query("SELECT d FROM DataManagement d WHERE " +
-            "(d.id.firstName = :firstName AND d.id.lastName = :lastName AND d.organizationId = :organizationId)")
-     List<DataManagement> findByBatch(@Param("firstName") List<String> firstNames, 
-                                      @Param("lastName") List<String> lastNames,
-                                      @Param("organizationId") List<String> organizationIds);
+            "(d.id.firstName IN :firstNames AND d.id.lastName IN :lastNames AND d.organizationId IN :organizationIds)")
+    List<DataManagement> findByBatch(@Param("firstNames") List<String> firstNames, 
+                                     @Param("lastNames") List<String> lastNames,
+                                     @Param("organizationIds") List<String> organizationIds);
 }
+

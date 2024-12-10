@@ -42,8 +42,8 @@ public class DataController {
             // Clear previous results from BatchResultHolder
             batchResultHolder.clearProcessedData();
 
-            // Populate the reader with input data
-            reader.setData(requestData);
+            // Populate the reader with batched data
+            reader.setBatch(requestData);
 
             // Run the batch job
             JobExecution jobExecution = jobLauncher.run(batchJob,
@@ -56,18 +56,11 @@ public class DataController {
                 Thread.sleep(100); // Pause briefly to avoid busy waiting
             }
 
-            // Check job status and handle failures
-            if (!jobExecution.getStatus().isUnsuccessful()) {
-                // Retrieve the processed data
-                List<DataResponseDTO> processedData = batchResultHolder.getProcessedData();
+            // Retrieve processed data
+            List<DataResponseDTO> processedData = batchResultHolder.getProcessedData();
 
-                // Return the processed data as a JSON response
-                return ResponseEntity.ok(processedData);
-            } else {
-                System.err.println("Batch job failed with status: " + jobExecution.getStatus());
-                return ResponseEntity.status(500).body(null);
-            }
-
+            // Return the processed data as a JSON response
+            return ResponseEntity.ok(processedData);
         } catch (Exception e) {
             System.err.println("Error occurred during batch processing: " + e.getMessage());
             e.printStackTrace();
