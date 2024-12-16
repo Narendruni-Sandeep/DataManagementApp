@@ -5,9 +5,9 @@ public class DataRequestDTO {
     private String firstName;
     private String lastName;
     private String organizationId;
+    private String email;
 
-    // Getters and Setters...
-
+    // Getters and Setters
     public String getFirstName() {
         return firstName;
     }
@@ -31,5 +31,14 @@ public class DataRequestDTO {
     public void setOrganizationId(String organizationId) {
         this.organizationId = organizationId;
     }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 }
+
 

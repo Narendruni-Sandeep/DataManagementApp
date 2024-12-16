@@ -34,6 +34,19 @@ public class DataController {
 
     @Autowired
     private DataRequestReader reader;
+    
+    @PostMapping("/upload")
+    public ResponseEntity<String> uploadData(@RequestBody List<DataRequestDTO> requestData) {
+        try {
+            service.saveUsers(requestData); // Call the service to process the data
+            return ResponseEntity.ok("Data uploaded successfully!");
+        } catch (Exception e) {
+            System.err.println("Error occurred during data upload: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Failed to upload data!");
+        }
+    }
+
 
     // Endpoint for triggering batch processing (for large dataset processing)
     @PostMapping("/process")

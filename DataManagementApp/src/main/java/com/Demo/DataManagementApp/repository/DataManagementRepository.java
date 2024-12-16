@@ -19,5 +19,8 @@ public interface DataManagementRepository extends JpaRepository<DataManagement, 
     List<DataManagement> findByBatch(@Param("firstNames") List<String> firstNames, 
                                      @Param("lastNames") List<String> lastNames,
                                      @Param("organizationIds") List<String> organizationIds);
+    
+    @Query("SELECT d.id FROM DataManagement d WHERE d.id IN :keys")
+    List<DataManagementKey> findExistingKeys(@Param("keys") List<DataManagementKey> keys);
 }
 

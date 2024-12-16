@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import com.Demo.DataManagementApp.dto.DataRequestDTO;
 import com.Demo.DataManagementApp.dto.DataResponseDTO;
 import com.Demo.DataManagementApp.model.DataManagement;
+import com.Demo.DataManagementApp.model.DataManagementKey;
 import com.Demo.DataManagementApp.repository.DataManagementRepository;
 
 import java.util.ArrayList;
@@ -20,6 +21,42 @@ public class DataManagementService {
 
     // Batch size for processing requests
     private static final int BATCH_SIZE = 50; 
+    
+ // Save uploaded users into the database
+    public void saveUsers(List<DataRequestDTO> requestDTOList) {
+        for (int i = 0; i < requestDTOList.size(); i += BATCH_SIZE) {
+            int end = Math.min(i + BATCH_SIZE, requestDTOList.size());
+            List<DataRequestDTO> chunk = requestDTOList.subList(i, end);
+            saveChunk(chunk);
+        }
+    }
+
+    private void saveChunk(List<DataRequestDTO> chunk) {
+        // Step 1: Filter out invalid data (null emails)
+        List<DataManagement> validData = chunk.stream()
+                .filter(dto -> dto.getEmail() != null) // Exclude entries with null email
+                .map(this::mapToEntity)
+                .collect(Collectors.toList());
+
+        // Step 2: Retrieve existing records to avoid duplicates
+        List<DataManagementKey> keys = validData.stream()
+                .map(DataManagement::getId)
+                .collect(Collectors.toList());
+        List<DataManagementKey> existingKeys = repository.findExistingKeys(keys);
+
+        // Step 3: Filter out duplicates
+        List<DataManagement> uniqueData = validData.stream()
+                .filter(data -> !existingKeys.contains(data.getId()))
+                .collect(Collectors.toList());
+
+        // Step 4: Perform a bulk insert for the remaining unique data
+        if (!uniqueData.isEmpty()) {
+            repository.saveAll(uniqueData);
+            System.out.println("Batch saved: " + uniqueData.size() + " records");
+        } else {
+            System.out.println("No new records to save in this chunk.");
+        }
+    }
 
     // The method to find users
     public List<DataResponseDTO> findUsers(List<DataRequestDTO> requestDTOList) {
@@ -78,5 +115,14 @@ public class DataManagementService {
         responseDTO.setOrganizationId(dataManagement.getOrganizationId());
         responseDTO.setEmail(dataManagement.getEmail());
         return responseDTO;
+    }
+    
+    private DataManagement mapToEntity(DataRequestDTO dto) {
+        DataManagement data = new DataManagement();
+        DataManagementKey key = new DataManagementKey(dto.getFirstName(), dto.getLastName());
+        data.setId(key);
+        data.setOrganizationId(dto.getOrganizationId());
+        data.setEmail(dto.getEmail());
+        return data;
     }
 }

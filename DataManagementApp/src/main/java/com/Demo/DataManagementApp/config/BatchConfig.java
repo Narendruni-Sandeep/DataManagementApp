@@ -33,7 +33,7 @@ public class BatchConfig {
                         ItemProcessor<DataManagement, DataResponseDTO> processor, // Updated to DataManagement
                         ItemWriter<DataResponseDTO> writer) {
         Step step = new StepBuilder("step1", jobRepository)
-                .<DataManagement, DataResponseDTO>chunk(500, transactionManager)  // Adjust the chunk size here
+                .<DataManagement, DataResponseDTO>chunk(1000, transactionManager)  // Adjust the chunk size here
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)
